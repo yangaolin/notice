@@ -60,11 +60,37 @@
 	        {{item.business_code_value}}</option>
 	    	 </select>
     	</div>
+    	<div class="noticeTop">
+    		<span>置顶：</span>
+    		<input type="checkbox">
+    		<span>设为置顶</span>
+    	</div>
+    	<div class="noticeContent">
+    		<span>公告内容：</span>
+    		<div class="noticeEdit">
+    		  <quill-editor ref="myTextEditor" v-model="editContent" @change="onEditorChange($event)">
+    		  </quill-editor>
+    		  <div class="upload">上传文件 <input type="file" @change="getFileUrl($event)"/></div>
+    		</div>
+    	</div>
+    	<div class="uploadFiles" v-if="files">
+    		<ul>
+    			<li v-for="(item,index) in files">{{item.name}}</li>
+    		</ul>
+    	</div>
+    	<div class="publishDepart">
+    		<span>公告类别：</span>
+    		 <select v-model="editNoticeData.notice_type">
+	        <option  v-for="(item,index) in homeNoticeType" v-bind:value="item.business_code_key">
+	        {{item.business_code_value}}</option>
+	    	 </select>
+    	</div>
     </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+import axios from 'axios'
 	export default {
 		data() {
   		return {
@@ -81,7 +107,9 @@
 				editNoticeData:{
 					notice_title:'',
 					notice_type: ''
-				}
+				},
+				editContent: '',
+				files:[]
   		}
   	},
   	watch: {
@@ -104,7 +132,10 @@
   		},
   		homeNoticeList(){
   			return this.$store.state.homeNoticeList
-  		}
+  		},
+  		editor() {
+        return this.$refs.myTextEditor.quillEditor
+      }
   	},
   	methods: {
   		//获取首页公告类型
@@ -119,8 +150,36 @@
   		handleSizeChange(val) {
 		    this.noticeData.page_size = val;
 		  },
+		  //跳页
 		  handleCurrentChange(val) {
-		    this.noticeData.page_no = val;
+		    this.noticeData.page_no = val;;
+
+		  },
+		  onEditorChange({ editor, html, text }) {
+		      this.content = html		  },
+		  //获取文件url
+		  getFileUrl(event){
+		  	let _this = this;
+		  	if(event.target.files.length){
+		  		let formData = new FormData();
+		  		formData.append("myFile", event.target.files[0]);
+		  		axios.post(
+		  			'http://file-management.zhaopin.com/attachmentClient/uploadImage?systemName=cust', 
+		  			formData, 
+		  			{
+		  		    headers: {
+		  		      'Content-Type': 'multipart/form-data'
+		  		      },
+		  		      responseType:'json'
+		  		}).then(res => {
+		  				let file = new Object()
+	          	file.name = res.data[0].name;
+	          	file.url = res.data[0].filename;
+	          	_this.files.push(file)
+	          	
+		  		})
+		  	}
+		  	
 		  }
   	}
 	}
@@ -284,8 +343,10 @@
 				margin-bottom:12px
 				span
 					display:inline-block
+					width:60px
 					height:16px
 					line-height:17px
+					text-align:right
 					font-weight: 600
 					font-size:$font-size-small
 					color:#323c47
@@ -299,10 +360,13 @@
 					border-radius: 2px
 			.noticeType
 				height:24px
+				margin-bottom:12px
 				overflow:hidden
 				span
 					display:inline-block
 					float:left
+					width:60px
+					text-align:right
 					height:24px
 					line-height:24px
 					font-weight: 600
@@ -318,4 +382,75 @@
 					option
 						color: #323c47
 						font-size:$font-size-small
+			.noticeTop
+				height:18px
+				margin-bottom:9px
+				overflow:hidden
+				span
+					&:nth-of-type(1)
+						display:inline-block
+						float:left
+						width:60px
+						height:18px
+						text-align:right
+						line-height:18px
+						font-weight: 600
+						font-size:$font-size-small
+						color:#323c47
+					&:nth-of-type(2)
+						height:18px
+						line-height:18px
+						font-size:$font-size-small
+						color:#323c47
+				input
+					display:inline-block
+					float:left
+					width:18px
+					height:18px
+					padding:2px
+			.noticeContent
+				height:400px
+				overflow:hidden
+				margin-bottom:12px		
+				span
+					&:nth-of-type(1)
+						display:inline-block
+						float:left
+						width:60px
+						height:15px
+						text-align:right
+						line-height:16px
+						font-weight: 600
+						font-size:$font-size-small
+						color:#323c47
+				.noticeEdit
+					position:relative
+					.quill-editor
+						display:inline-block
+						float:left
+						width:500px
+						height:300px
+					.upload
+						position: absolute
+						width: 100px
+						height: 30px
+						line-height: 30px
+						top: 56px
+						left: 140px
+						text-align: center
+						color: #000
+						background-color: #fff
+						z-index: 1
+						input
+							position: absolute
+							opacity: 0
+							width: 100px
+							left: 3px
+			.uploadFiles
+				ul
+					li
+						float:left
+						height:20px
+						line-height:20px
+						margin-right:20px
 </style>
