@@ -11,7 +11,8 @@ const store = new Vuex.Store({
   state: {
   	url:'http://192.168.5.220:20010',
     homeNoticeType: {},
-    homeNoticeList: {}
+    homeNoticeList: {},
+    draftNoticeList:{}
   },
   mutations: {
   	getHomeNoticeType(state,data){
@@ -19,7 +20,10 @@ const store = new Vuex.Store({
   	},
   	getHomeNoticeList(state,data){
   		state.homeNoticeList = data.data.data
-  	}
+  	},
+    getDraftNoticeList(state,data){
+      state.draftNoticeList = data.data.data
+    }
   },
   actions: {
   	//获取首页公告类型
@@ -39,7 +43,17 @@ const store = new Vuex.Store({
 			}).then(function (response) {
 				context.commit('getHomeNoticeList',response)
 			})
-  	}
+  	},
+    //获取草稿页公告列表
+    getDraftNoticeList (context,draftNoticeList){
+      axios({
+        method: 'post',
+        url: context.state.url+'/notice/search',
+        data: draftNoticeList
+      }).then(function (response) {
+        context.commit('getDraftNoticeList',response)
+      })
+    }
   }
 })
 
