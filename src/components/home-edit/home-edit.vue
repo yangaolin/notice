@@ -92,9 +92,9 @@
 					'notice_type':'',
 					'notice_content':'',
 					"notice_state":"1",
-					'notice_tag':'2',
+					'notice_tag':'0',
 					'notice_attachments':'{}',
-					"creator":"aolin",
+					"creator":"xiaoming",
 					'notice_publisher':'',
 					'notice_scope':'{"key":"全司"}',
 					'notice_validate_start':'',
@@ -111,7 +111,6 @@
 					"key":"全司"
 					}
 				],
-				whichMan:'',
 				pickerOptions: {
           disabledDate(time) {
             return time.getTime() < Date.now() - 8.64e7;
@@ -132,11 +131,17 @@
   				this.newNoticeData.notice_validate_start=''
   				this.newNoticeData.notice_validate_end=''
   			}
+  		},
+  		$route(){
+  			this.reviseNotice();
   		}
 		},
 		mounted(){
 			//获取首页公告类型
-  		this.getHomeNoticeType();
+  		this.getHomeNoticeType()
+  		if(this.$route.query.noticeId){
+  			this.reviseNotice()
+  		}
 		},
 		computed: {
   		homeNoticeType(){
@@ -200,27 +205,27 @@
 		  },
 		  //点击保存公告
 		  saveNotice(){
-		  	//如果已保存过，则返回
+		  	//当前id有值，证明已保存过再再修改保存或者从草稿页面点击修改跳过来
+		  	//这里要再次将当前id的公告进行保存
 		  	if(this.currentNoticeId){
-		  		console.log('已保存过')
-		  		return
+		  		this.newNoticeData.notice_id = this.currentNoticeId
 		  	}
-		  	this.$http({
-		  			method:'post',
-		  			url:this.$url+'/notice/save', 
-		  			data:this.newNoticeData
-		  			}).then(res => {
-							if(res.data.success){
-								//当保存后返回的公告ID赋值为当前的ID
-			  				this.currentNoticeId = res.data.data.notice_id
-			  				//将当前的公告状态置为草稿状态1
-			  				this.urrentNoticeState = '1'
-							}else{
-								alert(res.data.message)
-							}
-		  		}).catch(e => {
-						alert(e.data.message)
-		  		})
+	  		this.$http({
+	  			method:'post',
+	  			url:this.$url+'/notice/save', 
+	  			data:this.newNoticeData
+	  			}).then(res => {
+						if(res.data.success){
+							//当保存后返回的公告ID赋值为当前的ID
+		  				this.currentNoticeId = res.data.data.notice_id
+		  				//将当前的公告状态置为草稿状态1
+		  				this.currentNoticeState = '1'
+						}else{
+							alert(res.data.message)
+						}
+	  		}).catch(e => {
+					alert(e.data.message)
+	  		})
 		  },
 		  //点击发布申请
 		  publiseNotice(){
@@ -259,6 +264,86 @@
   						alert(e.data.message)
   		  		})
 		  	}
+		  },
+		  //router参数改变后,此时为草稿页面点击修改进来，根据草稿页面传进来的id查询此公告内容进行修改
+		  reviseNotice(){
+		  	if(this.$route.query.noticeId){
+		  		//将数据初始化
+		  		this.initNewNoticeData()
+		  		
+		  		//根据当前id查询公告内容赋给修改页面
+		  		this.$http({
+		  			url:this.$url+'/notice/edit?notice_id='+this.$route.query.noticeId
+		  			}).then(res => {
+		  				console.log(res)
+		  				if(res.data.success == true){
+		  					//给页面赋值
+		  					this.fillData(res.data.data)
+		  				}else{
+		  					console.log(res.data.message)
+		  				}
+		  		}).catch(e => {
+						console.log(e)
+		  		})
+		  	}
+		  },
+		  //修改前初始化数据
+		  initNewNoticeData(){
+		  	this.currentNoticeId = '';
+		  	this.currentNoticeState = '';
+
+		  	this.newNoticeData.notice_title = ''
+		  	this.newNoticeData.notice_type = ''
+		  	this.newNoticeData.notice_content = ''
+		  	this.newNoticeData.notice_state = '1'
+		  	this.newNoticeData.notice_tag = '0'
+		  	this.newNoticeData.notice_attachments = '{}'
+		  	this.newNoticeData.creator = 'xiaoming'
+		  	this.newNoticeData.notice_publisher = '{}'
+		  	this.newNoticeData.notice_scope = '{"key":"全司"}'
+		  	this.newNoticeData.notice_validate_start = ''
+		  	this.newNoticeData.notice_validate_end = ''
+
+		  	this.isTop = false
+		  	this.isLong = false
+		  	this.files = []
+		  	this.publishDate = ['集团总部-人力资源部']
+		  	this.toWhichMan = [{"key":"全司"}]
+		  },
+		  //根据修改公告传来的id查询出来的数据赋值
+		  fillData(data){
+				
+	  		this.currentNoticeId = data.notice_id
+	  		this.currentNoticeState = data.notice_state
+
+	  		this.newNoticeData.notice_title = data.notice_title
+		  	this.newNoticeData.notice_type = data.notice_type
+		  	this.newNoticeData.notice_content = data.notice_content
+		  	this.newNoticeData.notice_state = data.notice_state
+		  	this.newNoticeData.notice_tag = data.notice_tag
+		  	this.newNoticeData.notice_attachments = data.notice_attachments
+		  	this.newNoticeData.creator = data.creator
+		  	this.newNoticeData.notice_publisher = data.notice_publisher
+		  	this.newNoticeData.notice_scope = data.notice_scope
+		  	this.newNoticeData.notice_validate_start = data.notice_validate_start
+		  	this.newNoticeData.notice_validate_end = data.notice_validate_end
+
+		  	this.isTop = data.notice_tag =='1' ? true: false
+		  	this.isLong = data.notice_validate_start||data.notice_validate_end ? false :true
+
+		  	if(JSON.parse(data.notice_attachments)){
+		  		let attachments = JSON.parse(data.notice_attachments)
+		  		for (var key in attachments){
+		  			let file = new Object()
+	          file.name = key
+	          file.url = attachments[key]
+	          this.files.push(file)
+		  		}
+		  	}else{
+		  		this.files = []
+		  	}
+		  	this.publishDate = ['集团总部-人力资源部']
+		  	this.toWhichMan = [{"key":"全司"}]
 		  }
   	}
 	}

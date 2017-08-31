@@ -20,23 +20,17 @@
   	  homeNotEdit,
   	  homeEdit
   	},
-  	created(){
-  		this.reviseNoticeId = this.$route.query.noticeId
-  		console.log(this.reviseNoticeId)
-  		if(this.reviseNoticeId){
-  			this.edit = false
-  			this.edit = true
+  	watch:{
+  		$route(){
+  			if(this.$route.query.noticeId){
+  				this.edit = true
+  			}
   		}
   	},
-  	mounted() {
-  		
-  		
-  	},
-  	computed: {
-
-  	},
-  	methods: {
-  		
+  	created(){
+  		if(this.$route.query.noticeId){
+  				this.edit = true
+  			}
   	}
 	}
 </script>

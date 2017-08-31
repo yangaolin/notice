@@ -9,7 +9,7 @@ Vue.use(Vuex)
 const store = new Vuex.Store({
   // 定义状态
   state: {
-  	url:'http://192.168.5.220:20010',
+  	url:'http://192.168.5.220:20020',
     homeNoticeType: {},
     homeNoticeList: {},
     draftNoticeList:{}
