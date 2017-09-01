@@ -1,10 +1,7 @@
 <template>
 	<div class="notEdit">
     <div class="search-add">
-    	<div class="search">
-    		<input type="text" placeholder="搜索公告关键字找公告">
-    		<span></span>
-    	</div>
+    	<search></search>
     	<div class="add" @click="changeEdit">
     		<span class="icon"></span><span class="font">新公告</span>
     	</div>
@@ -29,9 +26,9 @@
 	  					<div class="noticeTitle">{{item.notice_title}}</div>
 	  					<div class="noticeCreator">{{item.creator}}&nbsp;&nbsp;&nbsp;{{item.create_date}}</div>
 	  					<div v-if="item.notice_state=='4'" class="overdue"></div>
-	  					<span v-if="item.notice_state=='4'" class="issue">发布</span>
-	  					<span v-if="item.notice_state=='3'" class="expire">到期</span>
-	  					<span v-if="item.notice_state=='3'" class="back">撤回</span> 
+	  					<span v-if="item.notice_state=='4'" class="issue" @click="issueNotice(item.notice_id)">发布</span>
+	  					<span v-if="item.notice_state=='3'" class="expire" @click="expireNotice(item.notice_id)">到期</span>
+	  					<span v-if="item.notice_state=='3'" class="back" @click="backNotice(item.notice_id)">撤回</span> 
 	  				</div>
 	  			</li>
 	  		</ul>
@@ -49,6 +46,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+	import search from '../search/search.vue'
 	export default {
 		data () {
 			return {
@@ -63,12 +61,18 @@
   			pageSizes:[4, 8, 12]
 			}
 		},
+		components: {
+  	  search
+  	},
 		watch:{
 			noticeData:{
   			handler(val){
   				this.getHomeNoticeList();
   			},
   			deep:true
+  		},
+  		$route(){
+  			this.getHomeNoticeList();
   		}
 		},
 		mounted() {
@@ -105,6 +109,57 @@
 		  //将公告置为编辑状态
 		  changeEdit(){
 		  	this.$emit('transferUser')
+		  },
+		  //发布公告  将状态置为待审核状态2
+		  issueNotice(noticeId){
+		  	let data = {"notice_id":noticeId,"notice_state":"2"}
+		  		this.$http({
+		  			method:'post',
+		  			url:this.$url+'/notice/release', 
+		  			data:data
+		  			}).then(res => {
+		  				if(res.data.success){
+		  					this.getHomeNoticeList();
+		  				}else{
+		  					alert(res.data.message)
+		  				}
+		  		}).catch(e => {
+						console.log(e)
+		  		})
+		  },
+		  //撤回公告   撤回状态为5   但是传1    因为撤回到草稿状态1
+		  backNotice(noticeId){
+		  	let data = {"notice_id":noticeId,"notice_state":"1"}
+		  		this.$http({
+		  			method:'post',
+		  			url:this.$url+'/notice/release', 
+		  			data:data
+		  			}).then(res => {
+		  				if(res.data.success){
+		  					this.getHomeNoticeList();
+		  				}else{
+		  					alert(res.data.message)
+		  				}
+		  		}).catch(e => {
+						console.log(e)
+		  		})
+		  },
+		  //将公告置为到期状态
+		  expireNotice(noticeId){
+		  	let data = {"notice_id":noticeId,"notice_state":"4"}
+		  		this.$http({
+		  			method:'post',
+		  			url:this.$url+'/notice/release', 
+		  			data:data
+		  			}).then(res => {
+		  				if(res.data.success){
+		  					this.getHomeNoticeList();
+		  				}else{
+		  					alert(res.data.message)
+		  				}
+		  		}).catch(e => {
+						console.log(e)
+		  		})
 		  }
 		}
 	}
@@ -116,27 +171,6 @@
 		.search-add
 			height:36px
 			margin-bottom:20px
-			.search
-				position:relative
-				width:708px
-				float: left
-				overflow:hidden
-				input
-					width:664px
-					height:18px
-					line-height:18px
-					border-radius: 2px
-					background-color: #edeff4
-					padding: 9px 30px 9px 14px
-					font-size:12px
-				span
-					display:inline-block
-					position: absolute
-					width:16px
-					height:16px
-					right: 14px
-					bottom: 10px
-					background-image:url('search.png')
 			.add
 				width:100px
 				height:36px
@@ -235,19 +269,20 @@
 								margin-top:6px
 								color: #5e6772
 								font-size: $font-size-small
-						.overdue
-							position:absolute
-							width:62px
-							height:62px
-							right:19px
-							top:16px
-							background-image:url('overdue.png')
-						.issue,.expire,.back
-							position:absolute
-							right:20px
-							bottom:11px
-							color: #1a8bfd
-							font-size:$font-size-small
-						.back
-							right:58px
+							.overdue
+								position:absolute
+								width:62px
+								height:62px
+								right:19px
+								top:16px
+								background-image:url('overdue.png')
+							.issue,.expire,.back
+								position:absolute
+								right:20px
+								bottom:11px
+								color: #1a8bfd
+								font-size:$font-size-small
+								cursor:default
+							.back
+								right:58px
 </style>

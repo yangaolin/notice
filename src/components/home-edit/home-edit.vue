@@ -270,7 +270,6 @@
 		  	if(this.$route.query.noticeId){
 		  		//将数据初始化
 		  		this.initNewNoticeData()
-		  		
 		  		//根据当前id查询公告内容赋给修改页面
 		  		this.$http({
 		  			url:this.$url+'/notice/edit?notice_id='+this.$route.query.noticeId

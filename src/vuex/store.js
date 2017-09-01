@@ -12,7 +12,9 @@ const store = new Vuex.Store({
   	url:'http://192.168.5.220:20020',
     homeNoticeType: {},
     homeNoticeList: {},
-    draftNoticeList:{}
+    draftNoticeList:{},
+    notReviewedNoticeList:{},
+    hasReviewedNoticeList:{}
   },
   mutations: {
   	getHomeNoticeType(state,data){
@@ -23,6 +25,12 @@ const store = new Vuex.Store({
   	},
     getDraftNoticeList(state,data){
       state.draftNoticeList = data.data.data
+    },
+    getNotReviewedNoticeData(state,data){
+      state.notReviewedNoticeList = data.data.data
+    },
+    getHasReviewedNoticeData(state,data){
+      state.hasReviewedNoticeList = data.data.data
     }
   },
   actions: {
@@ -45,13 +53,33 @@ const store = new Vuex.Store({
 			})
   	},
     //获取草稿页公告列表
-    getDraftNoticeList (context,draftNoticeList){
+    getDraftNoticeList (context,draftNoticeData){
       axios({
         method: 'post',
         url: context.state.url+'/notice/search',
-        data: draftNoticeList
+        data: draftNoticeData
       }).then(function (response) {
         context.commit('getDraftNoticeList',response)
+      })
+    },
+    //获取待审核页公告列表
+    getNotReviewedNoticeList (context,notReviewedNoticeData){
+      axios({
+        method: 'post',
+        url: context.state.url+'/notice/search',
+        data: notReviewedNoticeData
+      }).then(function (response) {
+        context.commit('getNotReviewedNoticeData',response)
+      })
+    },
+    //获取已审核页公告列表
+    getHasReviewedNoticeList (context,hasReviewedNoticeData){
+      axios({
+        method: 'post',
+        url: context.state.url+'/notice/search',
+        data: hasReviewedNoticeData
+      }).then(function (response) {
+        context.commit('getHasReviewedNoticeData',response)
       })
     }
   }

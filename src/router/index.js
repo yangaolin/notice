@@ -24,11 +24,11 @@ export default new Router({
     	component: DraftNotice
     },
     {
-    	path:'not-reviewed-notice',
+    	path: '/not-reviewed-notice',
     	component: NotReviewedNotice
     },
     {
-    	path: 'has-reviewed-notice',
+    	path: '/has-reviewed-notice',
     	component: HasReviewNotice
     }
   ]

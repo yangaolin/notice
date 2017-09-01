@@ -1,10 +1,7 @@
 <template>
   <div class="outer">
   	<div class="searchOuter">
-  		<div class="search">
-  			<input type="text" placeholder="搜索公告关键字找公告">
-  			<span></span>
-  		</div>
+  		<search></search>
   	</div>
   	<div class="draftNoticeList" v-if="draftNoticeList">
     	<div class="noticeCon">
@@ -18,8 +15,8 @@
     					<div class="noticeCreator">{{item.creator}}&nbsp;&nbsp;&nbsp;{{item.create_date}}</div>
     					<div class="handleThis">
     						<span><router-link :to="{path:'/home',query: {noticeId:item.notice_id}}" class="tab-item">修改</router-link></span>
-    						<span>删除</span>
-    						<span>发布</span>
+    						<span @click="deleteNotice(item.notice_id)">删除</span>
+    						<span @click="issueNotice(item.notice_id)">发布</span>
     					</div>
     				</div>
     			</li>
@@ -38,6 +35,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+	import search from '../search/search.vue'
 	export default {
 		data() {
 			return {
@@ -52,12 +50,18 @@
   			currentPage: 1
 			}
 		},
+		components: {
+  	  search
+  	},
 		watch:{
 			draftNoticeData:{
   			handler(val){
   				this.getDraftNoticeList();
   			},
   			deep:true
+  		},
+  		$route(){
+  			this.getDraftNoticeList();
   		}
 		},
 		mounted() {
@@ -67,7 +71,6 @@
 		computed: {
 			draftNoticeList(){
   			return this.$store.state.draftNoticeList
-  			console.log(this.$store.state.draftNoticeList)
   		}
 		},
 		methods:{
@@ -82,6 +85,41 @@
 		  //跳页
 		  handleCurrentChange(val) {
 		    this.draftNoticeData.page_no = val
+		  },
+		  //删除公告
+		  deleteNotice(noticeId){
+		  	this.$http({
+	  			method:'post',
+	  			url:this.$url+'/notice/delete', 
+	  			data:{
+	  				'notice_id':noticeId
+	  			}
+	  			}).then(res => {
+						if(res.data.success){
+							this.getDraftNoticeList();
+						}else{
+							alert(res.data.message)
+						}
+	  		}).catch(e => {
+					alert(e.data.message)
+	  		})
+		  },
+		  //发布公告  置为待审核状态2
+		  issueNotice(noticeId){
+		  	let data = {"notice_id":noticeId,"notice_state":"3"}
+		  		this.$http({
+		  			method:'post',
+		  			url:this.$url+'/notice/release', 
+		  			data:data
+		  			}).then(res => {
+		  				if(res.data.success){
+		  					this.getDraftNoticeList();
+		  				}else{
+		  					alert(res.data.message)
+		  				}
+		  		}).catch(e => {
+						console.log(e)
+		  		})
 		  }
 		}
 	}
@@ -97,27 +135,6 @@
 		.searchOuter
 			height:36px
 			margin-bottom:20px
-			.search
-				position:relative
-				width:708px
-				float: left
-				overflow:hidden
-				input
-					width:664px
-					height:18px
-					line-height:18px
-					border-radius: 2px
-					background-color: #edeff4
-					padding: 9px 30px 9px 14px
-					font-size:12px
-				span
-					display:inline-block
-					position: absolute
-					width:16px
-					height:16px
-					right: 14px
-					bottom: 10px
-					background-image:url('search.png')
 		.draftNoticeList
 			.noticeCon
 				overflow:hidden

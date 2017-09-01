@@ -1,7 +1,7 @@
 <template>
 	<div class="header">
 		<div class="headeContent">
-			<div class="logo"></div>
+			<div class="logo" @click="reload"></div>
 			<div class="tab">
 			  <router-link tag="div" class="tab-item" to="/home">
 			    <span class="tab-link">我的首页</span>
@@ -22,7 +22,11 @@
 
 <script type="text/ecmascript-6">
   export default {
-  	
+  	methods:{
+      reload(){
+        window.location.reload()
+      }
+    }
   }
 </script>
 
