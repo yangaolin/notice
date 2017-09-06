@@ -8,7 +8,7 @@
     	<div class="noticeType" v-if="homeNoticeType">
     		<span>公告类别：</span>
     		 <select v-model="newNoticeData.notice_type">
-	        <option  v-for="(item,index) in homeNoticeType" v-bind:value="item.business_code_key">
+	        <option  v-for="(item,index) in homeNoticeType" v-bind:value="item.business_code_key" >
 	        {{item.business_code_value}}</option>
 	    	 </select>
     	</div>
@@ -139,6 +139,7 @@
 		mounted(){
 			//获取首页公告类型
   		this.getHomeNoticeType()
+  		this.newNoticeData.notice_type = this.homeNoticeType[0].business_code_key
   		if(this.$route.query.noticeId){
   			this.reviseNotice()
   		}
