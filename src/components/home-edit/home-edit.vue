@@ -153,7 +153,7 @@
       }
   	},
   	methods:{
-  		//获取首页公告类型
+  		//获取首页公告类型111
   		getHomeNoticeType() {
   			this.$store.dispatch('getHomeNoticeType')
   		},
